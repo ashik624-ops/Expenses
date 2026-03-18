@@ -62,9 +62,12 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .suc-amt{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--green)}
 .suc-cat{font-size:14px;color:var(--muted)}
 .suc-btn{margin-top:14px;padding:12px 36px;background:var(--card);border:1.5px solid var(--border);border-radius:40px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
-.history-list{flex:1;overflow-y:auto;padding:0 16px 16px}
+.history-list{flex:1;overflow-y:auto;padding:0 0 16px}
 .history-list::-webkit-scrollbar{display:none}
-.hist-item{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--border)}
+.hist-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.hist-del-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:#e74c3c;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0}
+.hist-item{display:flex;align-items:center;gap:11px;padding:12px 16px;background:var(--bg);transition:transform .2s ease;position:relative;z-index:1}
+.hist-item.swiped{transform:translateX(-80px)}
 .hist-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .hist-body{flex:1;min-width:0}
 .hist-cat{font-size:13px;font-weight:500}
@@ -251,8 +254,54 @@ function renderHistory(){
   const cats=allCats();
   list.innerHTML=entries.slice(0,150).map(e=>{
     const color=COLORS[cats.indexOf(e.cat)%COLORS.length]||"#888";
-    return`<div class="hist-item"><div class="hist-dot" style="background:${color}"></div><div class="hist-body"><div class="hist-cat">${e.cat}</div><div class="hist-note">${e.note||e.mode||"—"}</div></div><div class="hist-right"><div class="hist-amt">${fmtAmt(e.amt)}</div><div class="hist-date">${fmtDate(e.date)}</div></div></div>`;
+    return`<div class="hist-wrap" data-id="${e.id}">
+      <div class="hist-del-bg">🗑</div>
+      <div class="hist-item">
+        <div class="hist-dot" style="background:${color}"></div>
+        <div class="hist-body"><div class="hist-cat">${e.cat}</div><div class="hist-note">${e.note||e.mode||"—"}</div></div>
+        <div class="hist-right"><div class="hist-amt">${fmtAmt(e.amt)}</div><div class="hist-date">${fmtDate(e.date)}</div></div>
+      </div>
+    </div>`;
   }).join("");
+  // Attach swipe listeners
+  list.querySelectorAll(".hist-wrap").forEach(wrap=>{
+    const item=wrap.querySelector(".hist-item");
+    let startX=0,startY=0,dragging=false,swiped=false;
+    item.addEventListener("touchstart",ev=>{
+      startX=ev.touches[0].clientX;startY=ev.touches[0].clientY;dragging=true;
+    },{passive:true});
+    item.addEventListener("touchmove",ev=>{
+      if(!dragging)return;
+      const dx=ev.touches[0].clientX-startX;
+      const dy=Math.abs(ev.touches[0].clientY-startY);
+      if(dy>20&&Math.abs(dx)<dy){dragging=false;return;}
+      if(dx<-10){item.style.transition="none";item.style.transform=`translateX(${Math.max(dx,-80)}px)`;}
+    },{passive:true});
+    item.addEventListener("touchend",ev=>{
+      if(!dragging)return;dragging=false;
+      const dx=ev.changedTouches[0].clientX-startX;
+      item.style.transition="transform .2s ease";
+      if(dx<-50){
+        item.style.transform="translateX(-80px)";swiped=true;
+        // close any other open swipes
+        list.querySelectorAll(".hist-item.swiped").forEach(x=>{if(x!==item){x.classList.remove("swiped");x.style.transform="";}});
+        item.classList.add("swiped");
+      } else {
+        item.style.transform="";item.classList.remove("swiped");swiped=false;
+      }
+    },{passive:true});
+    // Tap delete bg
+    wrap.querySelector(".hist-del-bg").addEventListener("click",()=>{
+      const id=parseInt(wrap.dataset.id);
+      wrap.style.transition="opacity .2s,max-height .3s";
+      wrap.style.opacity="0";wrap.style.maxHeight="0";wrap.style.overflow="hidden";
+      setTimeout(()=>{entries=entries.filter(e=>e.id!==id);saveEntries();renderHistory();},280);
+    });
+    // Tap elsewhere closes swipe
+    item.addEventListener("click",()=>{
+      if(swiped){item.style.transform="";item.classList.remove("swiped");swiped=false;}
+    });
+  });
 }
 
 function openSettings(){document.getElementById("screen-settings").classList.remove("slide-left");}
