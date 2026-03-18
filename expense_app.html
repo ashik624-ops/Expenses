@@ -19,7 +19,8 @@
 html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);overflow:hidden;overscroll-behavior:none}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;padding-bottom:60px;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s}
 .screen.hidden{transform:translateY(50px);opacity:0;pointer-events:none}
-.screen.slide-left{transform:translateX(-100%);opacity:0;pointer-events:none}
+.screen.slide-left{transform:translateX(100%);opacity:0;pointer-events:none}
+#screen-settings{z-index:60}
 .topbar{padding:40px 18px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .topbar h1{font-size:19px;font-weight:600;letter-spacing:-.3px}
 .topbar .sub{font-size:11px;color:var(--muted);margin-top:1px}
