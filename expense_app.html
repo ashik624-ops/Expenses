@@ -31,9 +31,8 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .amount-bar .val.on{color:var(--accent)}
 .amount-bar .bksp{width:40px;height:40px;border-radius:var(--rs);background:rgba(255,255,255,0.05);border:none;color:var(--muted);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .sec-lbl{padding:0 16px 6px;font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;flex-shrink:0}
-.cat-scroll{padding:0 16px 2px;display:flex;gap:7px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
-.cat-scroll::-webkit-scrollbar{display:none}
-.cat-chip{flex-shrink:0;padding:7px 13px;border-radius:40px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.cat-scroll{padding:0 16px 2px;display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0}
+.cat-chip{padding:6px 11px;border-radius:40px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
 .cat-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .mode-row{padding:7px 16px 0;display:flex;gap:6px;flex-shrink:0}
 .mode-chip{flex:1;padding:6px 2px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:10px;font-weight:500;text-align:center;cursor:pointer;transition:all .14s}
@@ -118,6 +117,7 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 <div class="screen hidden" id="screen-history">
   <div class="topbar">
     <div><h1>History</h1><div class="sub" id="hist-total-label"></div></div>
+    <div class="icon-btn" onclick="exportCSV()" title="Export to Excel">⬇</div>
   </div>
   <div class="history-list" id="history-list"></div>
 </div>
@@ -160,7 +160,7 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 </nav>
 
 <script>
-const FIXED_CATS=["Grocery","Family","Recharge Bills","Maid","School Education","Tuition Fee","Home Renovation","Home Maintenance","Shopping","Tour","Others"];
+const FIXED_CATS=["Grocery","Family","Recharge","Maid","School","Tuition","Renovation","Maintenance","Shopping","Tour","Others"];
 const MODES=["Cash","UPI","Card","Net Banking","Cheque"];
 const COLORS=["#27c97a","#4a9eff","#f5a623","#e94560","#a78bfa","#34d399","#fb923c","#60a5fa","#f472b6","#2dd4bf","#94a3b8","#ff6b6b","#ffd93d","#6bcb77"];
 let amtStr="",selectedCat="",selectedMode="UPI",selectedDate=todayStr();
@@ -322,6 +322,34 @@ function showScreen(n){
   document.getElementById("nav-history").classList.toggle("active",n==="history");
   if(n==="history")renderHistory();
 }
+function exportCSV(){
+  if(!entries.length){alert("No entries to export yet.");return;}
+  const rows=[["Date","Category","Amount (Rs)","Payment Mode","Note"]];
+  entries.forEach(e=>{
+    rows.push([
+      fmtDate(e.date),
+      e.cat,
+      e.amt.toFixed(2),
+      e.mode||"",
+      (e.note||"").replace(/,/g," ")
+    ]);
+  });
+  // Add totals row
+  rows.push([]);
+  rows.push(["TOTAL","",""+entries.reduce((a,e)=>a+e.amt,0).toFixed(2),"",""]);
+  const csv=rows.map(r=>r.join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  const today=todayStr().replace(/-/g,"");
+  a.download="Expenses_"+today+".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 init();
 </script>
 </body>
