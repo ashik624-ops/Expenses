@@ -15,46 +15,74 @@
   --border:rgba(255,255,255,0.09);--text:#f0f4f8;
   --muted:rgba(240,244,248,0.42);--accent:#e94560;
   --green:#27c97a;--blue:#4a9eff;--r:14px;--rs:10px;
+  --nav:60px;--pad:196px; /* pad = numpad height */
 }
 html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);overflow:hidden;overscroll-behavior:none}
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;padding-bottom:60px;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s}
-.screen.hidden{transform:translateY(50px);opacity:0;pointer-events:none}
-.screen.slide-left{transform:translateX(100%);opacity:0;pointer-events:none}
-#screen-settings{z-index:60}
-.topbar{padding:40px 18px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s;z-index:10}
+.screen.off{transform:translateY(40px);opacity:0;pointer-events:none}
+
+/* ── SETTINGS OVERLAY (slides over everything) ── */
+#screen-settings{z-index:80;transform:translateX(100%)}
+#screen-settings.open{transform:translateX(0)}
+
+/* ── TOPBAR ── */
+.topbar{padding:44px 18px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .topbar h1{font-size:19px;font-weight:600;letter-spacing:-.3px}
 .topbar .sub{font-size:11px;color:var(--muted);margin-top:1px}
-.icon-btn{width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px}
-.amount-bar{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;display:flex;align-items:baseline;gap:6px;flex-shrink:0}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:var(--card);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);flex-shrink:0}
+
+/* ── ADD SCREEN: scrollable top, fixed numpad ── */
+#screen-add{padding-bottom:0}
+.add-scroll{flex:1;overflow-y:auto;padding-bottom:calc(var(--pad) + var(--nav) + 8px);scrollbar-width:none}
+.add-scroll::-webkit-scrollbar{display:none}
+
+/* ── NUMPAD fixed above navbar ── */
+.numpad-fixed{position:fixed;bottom:var(--nav);left:0;right:0;height:var(--pad);padding:6px 14px 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--bg);border-top:1px solid var(--border);z-index:20}
+.num-key{background:var(--card);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:400;color:var(--text);cursor:pointer;transition:background .1s,transform .08s;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.num-key:active{background:var(--surface);transform:scale(.93)}
+.num-key.dot{font-size:26px;font-weight:300}
+.num-key.submit{background:var(--accent);border-color:var(--accent);font-size:14px;font-weight:700;letter-spacing:.04em;color:#fff}
+.num-key.submit:active{background:#c73450}
+
+/* ── AMOUNT ── */
+.amount-bar{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;display:flex;align-items:baseline;gap:6px}
 .amount-bar .cur{font-size:18px;font-weight:300;color:var(--muted)}
 .amount-bar .val{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:var(--text);letter-spacing:-1px;flex:1;min-width:10px}
 .amount-bar .val.on{color:var(--accent)}
 .amount-bar .bksp{width:40px;height:40px;border-radius:var(--rs);background:rgba(255,255,255,0.05);border:none;color:var(--muted);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.sec-lbl{padding:0 16px 6px;font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;flex-shrink:0}
-.cat-scroll{padding:0 16px 2px;display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0}
-.cat-chip{padding:6px 11px;border-radius:40px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+
+/* ── CATEGORIES ── */
+.sec-lbl{padding:0 16px 6px;font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.cat-scroll{padding:0 16px 4px;display:flex;flex-wrap:wrap;gap:6px}
+.cat-chip{padding:6px 12px;border-radius:40px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
 .cat-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.mode-row{padding:7px 16px 0;display:flex;gap:6px;flex-shrink:0}
-.mode-chip{flex:1;padding:6px 2px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:10px;font-weight:500;text-align:center;cursor:pointer;transition:all .14s}
+
+/* ── MODE ── */
+.mode-row{padding:8px 16px 0;display:flex;gap:6px}
+.mode-chip{flex:1;padding:7px 2px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:10px;font-weight:500;text-align:center;cursor:pointer;transition:all .14s}
 .mode-chip.active{border-color:var(--blue);color:var(--blue);background:rgba(74,158,255,.1)}
-.date-row{padding:7px 16px 0;display:flex;align-items:center;gap:8px;flex-shrink:0}
-.date-badge{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:var(--rs);padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+
+/* ── DATE ── */
+.date-row{padding:8px 16px 0;display:flex;align-items:center;gap:8px}
+.date-badge{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
 .date-badge b{color:var(--text);font-weight:500}
 .date-inp{position:absolute;opacity:0;width:1px;height:1px}
-.date-edit{padding:7px 11px;border-radius:var(--rs);background:var(--card);border:1.5px solid var(--border);color:var(--muted);font-size:11px;cursor:pointer;white-space:nowrap}
-.note-row{padding:7px 16px 0;flex-shrink:0}
+.date-edit{padding:8px 12px;border-radius:var(--rs);background:var(--card);border:1.5px solid var(--border);color:var(--muted);font-size:11px;cursor:pointer;white-space:nowrap}
+
+/* ── NOTE ── */
+.note-row{padding:8px 16px 0}
 .note-inp{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:var(--rs);padding:9px 13px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;resize:none;outline:none}
 .note-inp::placeholder{color:var(--muted)}
-.numpad{flex-shrink:0;height:216px;padding:8px 16px 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.num-key{background:var(--card);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:400;color:var(--text);cursor:pointer;transition:background .1s,transform .08s;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.num-key:active{background:var(--surface);transform:scale(.93)}
-.num-key.dot{font-size:26px;font-weight:300}
-.num-key.submit{background:var(--accent);border-color:var(--accent);font-size:14px;font-weight:600;letter-spacing:.04em;color:#fff}
-.num-key.submit:active{background:#c73450}
-.navbar{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:50}
+
+/* ── NAVBAR ── */
+.navbar{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:50}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:500;transition:color .14s}
 .nav-item.active{color:var(--accent)}
 .nav-icon{font-size:20px;line-height:1}
+
+/* ── SUCCESS ── */
 .suc-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:100;opacity:0;pointer-events:none;transition:opacity .28s}
 .suc-overlay.show{opacity:1;pointer-events:all}
 .suc-icon{width:72px;height:72px;border-radius:50%;background:rgba(39,201,122,.14);display:flex;align-items:center;justify-content:center;font-size:32px;animation:pop .38s cubic-bezier(.34,1.56,.64,1)}
@@ -62,12 +90,13 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .suc-amt{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--green)}
 .suc-cat{font-size:14px;color:var(--muted)}
 .suc-btn{margin-top:14px;padding:12px 36px;background:var(--card);border:1.5px solid var(--border);border-radius:40px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* ── HISTORY ── */
 .history-list{flex:1;overflow-y:auto;padding:0 0 16px}
 .history-list::-webkit-scrollbar{display:none}
 .hist-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
-.hist-del-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:#e74c3c;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0}
+.hist-del-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:#e74c3c;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
 .hist-item{display:flex;align-items:center;gap:11px;padding:12px 16px;background:var(--bg);transition:transform .2s ease;position:relative;z-index:1}
-.hist-item.swiped{transform:translateX(-80px)}
 .hist-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .hist-body{flex:1;min-width:0}
 .hist-cat{font-size:13px;font-weight:500}
@@ -76,6 +105,8 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .hist-amt{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--accent)}
 .hist-date{font-size:10px;color:var(--muted);margin-top:2px}
 .empty-hist{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+
+/* ── SETTINGS ── */
 .settings-body{flex:1;overflow-y:auto;padding:0 16px 40px}
 .setting-block{margin-bottom:20px}
 .setting-block h3{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
@@ -85,44 +116,55 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .setting-row textarea{resize:none;height:32px;line-height:1.4}
 .save-btn{width:100%;padding:14px;border-radius:var(--r);background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .url-hint{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.5}
+
+/* ── HISTORY screen needs bottom padding for navbar ── */
+#screen-history{padding-bottom:var(--nav)}
+#screen-settings{padding-bottom:0}
+
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 </style>
 </head>
 <body>
 
+<!-- ADD SCREEN -->
 <div class="screen" id="screen-add">
   <div class="topbar">
     <div><h1>Log Expense</h1><div class="sub" id="today-label"></div></div>
     <div class="icon-btn" onclick="openSettings()">⚙</div>
   </div>
-  <div class="amount-bar">
-    <span class="cur">₹</span>
-    <div class="val" id="amt-display">0</div>
-    <button class="bksp" onclick="backspace()">⌫</button>
+  <div class="add-scroll">
+    <div class="amount-bar">
+      <span class="cur">₹</span>
+      <div class="val" id="amt-display">0</div>
+      <button class="bksp" onclick="backspace()">⌫</button>
+    </div>
+    <div class="sec-lbl">Category</div>
+    <div class="cat-scroll" id="cat-scroll"></div>
+    <div class="mode-row" id="mode-row"></div>
+    <div class="date-row">
+      <div class="date-badge">📅 <b id="date-display"></b></div>
+      <input type="date" class="date-inp" id="date-inp" onchange="dateChanged()">
+      <div class="date-edit" onclick="document.getElementById('date-inp').click()">Change</div>
+    </div>
+    <div class="note-row">
+      <textarea class="note-inp" id="note-inp" placeholder="Note (optional)" rows="1"></textarea>
+    </div>
   </div>
-  <div class="sec-lbl">Category</div>
-  <div class="cat-scroll" id="cat-scroll"></div>
-  <div class="mode-row" id="mode-row"></div>
-  <div class="date-row">
-    <div class="date-badge">📅 <b id="date-display"></b></div>
-    <input type="date" class="date-inp" id="date-inp" onchange="dateChanged()">
-    <div class="date-edit" onclick="document.getElementById('date-inp').click()">Change</div>
-  </div>
-  <div class="note-row">
-    <textarea class="note-inp" id="note-inp" placeholder="Note (optional)" rows="1"></textarea>
-  </div>
-  <div class="numpad" id="numpad"></div>
+  <!-- Numpad fixed above navbar -->
+  <div class="numpad-fixed" id="numpad"></div>
 </div>
 
-<div class="screen hidden" id="screen-history">
+<!-- HISTORY SCREEN -->
+<div class="screen off" id="screen-history">
   <div class="topbar">
     <div><h1>History</h1><div class="sub" id="hist-total-label"></div></div>
-    <div class="icon-btn" onclick="exportCSV()" title="Export to Excel">⬇</div>
+    <div class="icon-btn" onclick="exportCSV()">⬇</div>
   </div>
   <div class="history-list" id="history-list"></div>
 </div>
 
-<div class="screen hidden slide-left" id="screen-settings">
+<!-- SETTINGS (slides in from right over everything) -->
+<div class="screen" id="screen-settings" style="background:var(--bg)">
   <div class="topbar">
     <div class="icon-btn" onclick="closeSettings()">←</div>
     <div style="flex:1;padding-left:12px"><h1>Settings</h1></div>
@@ -131,18 +173,19 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
     <div class="setting-block">
       <h3>Google Sheet (optional)</h3>
       <div class="setting-row"><label>URL</label><textarea id="cfg-url" placeholder="Apps Script Web App URL"></textarea></div>
-      <div class="url-hint">Sheet → Extensions → Apps Script → Deploy → New Deployment → Web App → Copy URL and paste here</div>
+      <div class="url-hint">Sheet → Extensions → Apps Script → Deploy → New Deployment → Web App → Copy URL</div>
     </div>
     <div class="setting-block">
       <h3>Custom Categories</h3>
-      <div class="setting-row"><label>Custom 1</label><input type="text" id="cfg-c1" placeholder="e.g. Medical"></div>
-      <div class="setting-row"><label>Custom 2</label><input type="text" id="cfg-c2" placeholder="e.g. Vehicle"></div>
+      <div class="setting-row"><label>Custom 1</label><input type="text" id="cfg-c1" placeholder="e.g. Dineout"></div>
+      <div class="setting-row"><label>Custom 2</label><input type="text" id="cfg-c2" placeholder="e.g. Medical"></div>
       <div class="setting-row"><label>Custom 3</label><input type="text" id="cfg-c3" placeholder="e.g. EMI"></div>
     </div>
     <button class="save-btn" onclick="saveSettings()">Save Settings</button>
   </div>
 </div>
 
+<!-- SUCCESS -->
 <div class="suc-overlay" id="suc-overlay">
   <div class="suc-icon">✓</div>
   <div class="suc-amt" id="suc-amt"></div>
@@ -150,6 +193,7 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
   <button class="suc-btn" onclick="dismissSuccess()">Add Another</button>
 </div>
 
+<!-- NAVBAR -->
 <nav class="navbar">
   <div class="nav-item active" id="nav-add" onclick="showScreen('add')">
     <div class="nav-icon">＋</div><span>Add</span>
@@ -264,17 +308,13 @@ function renderHistory(){
       </div>
     </div>`;
   }).join("");
-  // Attach swipe listeners
   list.querySelectorAll(".hist-wrap").forEach(wrap=>{
     const item=wrap.querySelector(".hist-item");
     let startX=0,startY=0,dragging=false,swiped=false;
-    item.addEventListener("touchstart",ev=>{
-      startX=ev.touches[0].clientX;startY=ev.touches[0].clientY;dragging=true;
-    },{passive:true});
+    item.addEventListener("touchstart",ev=>{startX=ev.touches[0].clientX;startY=ev.touches[0].clientY;dragging=true;},{passive:true});
     item.addEventListener("touchmove",ev=>{
       if(!dragging)return;
-      const dx=ev.touches[0].clientX-startX;
-      const dy=Math.abs(ev.touches[0].clientY-startY);
+      const dx=ev.touches[0].clientX-startX,dy=Math.abs(ev.touches[0].clientY-startY);
       if(dy>20&&Math.abs(dx)<dy){dragging=false;return;}
       if(dx<-10){item.style.transition="none";item.style.transform=`translateX(${Math.max(dx,-80)}px)`;}
     },{passive:true});
@@ -282,31 +322,20 @@ function renderHistory(){
       if(!dragging)return;dragging=false;
       const dx=ev.changedTouches[0].clientX-startX;
       item.style.transition="transform .2s ease";
-      if(dx<-50){
-        item.style.transform="translateX(-80px)";swiped=true;
-        // close any other open swipes
-        list.querySelectorAll(".hist-item.swiped").forEach(x=>{if(x!==item){x.classList.remove("swiped");x.style.transform="";}});
-        item.classList.add("swiped");
-      } else {
-        item.style.transform="";item.classList.remove("swiped");swiped=false;
-      }
+      if(dx<-50){item.style.transform="translateX(-80px)";swiped=true;
+        list.querySelectorAll(".hist-item").forEach(x=>{if(x!==item){x.style.transform="";} });
+      }else{item.style.transform="";swiped=false;}
     },{passive:true});
-    // Tap delete bg
     wrap.querySelector(".hist-del-bg").addEventListener("click",()=>{
-      const id=parseInt(wrap.dataset.id);
-      wrap.style.transition="opacity .2s,max-height .3s";
-      wrap.style.opacity="0";wrap.style.maxHeight="0";wrap.style.overflow="hidden";
-      setTimeout(()=>{entries=entries.filter(e=>e.id!==id);saveEntries();renderHistory();},280);
+      wrap.style.transition="opacity .2s,max-height .3s";wrap.style.opacity="0";wrap.style.maxHeight="0";wrap.style.overflow="hidden";
+      setTimeout(()=>{entries=entries.filter(e=>e.id!==parseInt(wrap.dataset.id));saveEntries();renderHistory();},280);
     });
-    // Tap elsewhere closes swipe
-    item.addEventListener("click",()=>{
-      if(swiped){item.style.transform="";item.classList.remove("swiped");swiped=false;}
-    });
+    item.addEventListener("click",()=>{if(swiped){item.style.transform="";swiped=false;}});
   });
 }
 
-function openSettings(){document.getElementById("screen-settings").classList.remove("slide-left");}
-function closeSettings(){document.getElementById("screen-settings").classList.add("slide-left");}
+function openSettings(){document.getElementById("screen-settings").classList.add("open");}
+function closeSettings(){document.getElementById("screen-settings").classList.remove("open");}
 function saveSettings(){
   cfg.url=document.getElementById("cfg-url").value.trim();
   cfg.c1=document.getElementById("cfg-c1").value.trim()||"Custom 1";
@@ -316,8 +345,9 @@ function saveSettings(){
   buildCats();closeSettings();
 }
 function showScreen(n){
-  document.getElementById("screen-add").classList.toggle("hidden",n!=="add");
-  document.getElementById("screen-history").classList.toggle("hidden",n!=="history");
+  document.getElementById("screen-add").classList.toggle("off",n!=="add");
+  document.getElementById("screen-history").classList.toggle("off",n!=="history");
+  document.getElementById("numpad").style.display=n==="add"?"grid":"none";
   document.getElementById("nav-add").classList.toggle("active",n==="add");
   document.getElementById("nav-history").classList.toggle("active",n==="history");
   if(n==="history")renderHistory();
@@ -325,31 +355,16 @@ function showScreen(n){
 function exportCSV(){
   if(!entries.length){alert("No entries to export yet.");return;}
   const rows=[["Date","Category","Amount (Rs)","Payment Mode","Note"]];
-  entries.forEach(e=>{
-    rows.push([
-      fmtDate(e.date),
-      e.cat,
-      e.amt.toFixed(2),
-      e.mode||"",
-      (e.note||"").replace(/,/g," ")
-    ]);
-  });
-  // Add totals row
+  entries.forEach(e=>rows.push([fmtDate(e.date),e.cat,e.amt.toFixed(2),e.mode||"",(e.note||"").replace(/,/g," ")]));
   rows.push([]);
   rows.push(["TOTAL","",""+entries.reduce((a,e)=>a+e.amt,0).toFixed(2),"",""]);
   const csv=rows.map(r=>r.join(",")).join("\n");
   const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-  a.href=url;
-  const today=todayStr().replace(/-/g,"");
-  a.download="Expenses_"+today+".csv";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  a.href=url;a.download="Expenses_"+todayStr().replace(/-/g,"")+".csv";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
-
 init();
 </script>
 </body>
