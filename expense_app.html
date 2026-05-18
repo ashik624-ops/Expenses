@@ -67,10 +67,10 @@ html,body{height:100%;background:var(--bg);font-family:'Outfit',sans-serif;color
 .sec-lbl{padding:0 20px 7px;font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 
 /* ── CATEGORIES ── */
-.cat-wrap{padding:0 20px 4px;display:flex;flex-wrap:wrap;gap:7px;max-height:116px;overflow-y:auto;scrollbar-width:none}
+.cat-wrap{padding:0 20px 4px;display:flex;flex-wrap:wrap;gap:8px;max-height:160px;overflow-y:auto;scrollbar-width:none}
 .cat-wrap::-webkit-scrollbar{display:none}
-.cat-chip{padding:6px 13px;border-radius:40px;border:1.5px solid var(--border2);background:var(--card);color:var(--muted2);font-size:11px;font-weight:500;cursor:pointer;transition:all .16s;white-space:nowrap}
-.cat-chip.active{background:var(--gold);border-color:var(--gold);color:#1a1208;font-weight:600}
+.cat-chip{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--border2);background:var(--card);color:var(--muted2);font-size:22px;font-weight:500;cursor:pointer;transition:all .16s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative}
+.cat-chip.active{background:var(--gold);border-color:var(--gold);color:#1a1208;font-weight:600;transform:scale(1.08)}
 .cat-chip.recurring-cat{border-color:rgba(78,203,141,0.4)}
 
 /* ── MODE ── */
@@ -354,9 +354,9 @@ select.edit-inp{cursor:pointer}
 
 <script>
 // ── CONSTANTS ────────────────────────────────────────────
-const FIXED_CATS=["Grocery","Rice","Family","Recharge","Maid","School","Tuition","Renovation","Maintenance","Shopping","Tour","Medical","Household Items","EMI","Gas","Others"];
+const FIXED_CATS=["Grocery","Rice","Oil","Family","Recharge","Maid","School","Tuition","Renovation","Maintenance","Shopping","Tour","Medical","Household Items","EMI","Gas","Masjid","Others"];
 const MODES=["Cash","UPI","Card","Net Banking","Cheque"];
-const CAT_EMOJIS={"Grocery":"🛒","Rice":"🍚","Family":"👨‍👩‍👧","Recharge":"📱","Maid":"🧹","School":"📚","Tuition":"✏️","Renovation":"🔨","Maintenance":"🔧","Shopping":"🛍","Tour":"✈️","Medical":"💊","Household Items":"🏠","EMI":"💳","Gas":"🔥","Others":"📦","Custom 1":"📌","Custom 2":"📌","Custom 3":"📌"};
+const CAT_EMOJIS={"Grocery":"🛒","Rice":"🍚","Oil":"🫙","Family":"👨‍👩‍👧","Recharge":"📱","Maid":"🧹","School":"📚","Tuition":"✏️","Renovation":"🔨","Maintenance":"🔧","Shopping":"🛍","Tour":"✈️","Medical":"💊","Household Items":"🏠","EMI":"💳","Gas":"🔥","Masjid":"🕌","Others":"📦","Custom 1":"📌","Custom 2":"📌","Custom 3":"📌"};
 const CAT_COLORS=["#27c97a","#4a9eff","#f5a623","#e94560","#a78bfa","#34d399","#fb923c","#60a5fa","#f472b6","#2dd4bf","#94a3b8","#ff6b6b","#ffd93d","#6bcb77"];
 
 // ── STATE ────────────────────────────────────────────────
@@ -412,7 +412,7 @@ function backspace(){amtStr=amtStr.slice(0,-1);updAmt();}
 function updAmt(){
   const el=document.getElementById("amt-display");
   el.textContent=amtStr||"0";el.classList.toggle("on",!!amtStr&&amtStr!=="0");
-  document.getElementById("hero-hint").textContent=selectedCat?(amtStr?"":"tap ADD to save"):"tap a category & enter amount";
+  document.getElementById("hero-hint").textContent=selectedCat?(amtStr?"":catEmoji(selectedCat)+" "+selectedCat+" — tap ADD to save"):"tap a category & enter amount";
 }
 
 // ── CATEGORIES ───────────────────────────────────────────
@@ -422,7 +422,7 @@ function buildCats(){
     const c=document.createElement("div");
     const recurring=entries.filter(e=>e.recurring&&e.cat===cat).length>0;
     c.className="cat-chip"+(selectedCat===cat?" active":"")+(recurring?" recurring-cat":"");
-    c.textContent=(recurring?"🔁 ":catEmoji(cat)+" ")+cat;
+    const emoji=recurring?"🔁":catEmoji(cat);const shortName=cat.length>6?cat.substring(0,5)+".":cat;c.innerHTML=`<span style="font-size:20px;line-height:1">${emoji}</span><span style="font-size:8px;color:var(--muted);line-height:1;max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortName}</span>`;c.title=cat;
     c.addEventListener("click",()=>{
       selectedCat=cat;
       document.querySelectorAll(".cat-chip").forEach(x=>x.classList.remove("active"));
