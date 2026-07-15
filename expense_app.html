@@ -67,10 +67,9 @@ html,body{height:100%;background:var(--bg);font-family:'Outfit',sans-serif;color
 .sec-lbl{padding:0 20px 7px;font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 
 /* ── CATEGORIES ── */
-.cat-wrap{padding:0 20px 4px;display:flex;flex-wrap:wrap;gap:8px;max-height:160px;overflow-y:auto;scrollbar-width:none}
-.cat-wrap::-webkit-scrollbar{display:none}
-.cat-chip{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--border2);background:var(--card);color:var(--muted2);font-size:22px;font-weight:500;cursor:pointer;transition:all .16s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative}
-.cat-chip.active{background:var(--gold);border-color:var(--gold);color:#1a1208;font-weight:600;transform:scale(1.08)}
+.cat-wrap{padding:0 20px 4px;display:flex;flex-wrap:wrap;gap:7px}
+.cat-chip{padding:6px 13px;border-radius:40px;border:1.5px solid var(--border2);background:var(--card);color:var(--muted2);font-size:11px;font-weight:500;cursor:pointer;transition:all .16s;white-space:nowrap}
+.cat-chip.active{background:var(--gold);border-color:var(--gold);color:#1a1208;font-weight:600}
 .cat-chip.recurring-cat{border-color:rgba(78,203,141,0.4)}
 
 /* ── MODE ── */
@@ -320,12 +319,6 @@ select.edit-inp{cursor:pointer}
       <div class="setting-row"><label>URL</label><textarea id="cfg-url" placeholder="Apps Script Web App URL"></textarea></div>
       <div class="url-hint">Sheet → Extensions → Apps Script → Deploy → New Deployment → Web App → Copy URL</div>
     </div>
-    <div class="setting-block">
-      <h3>Custom Categories</h3>
-      <div class="setting-row"><label>Custom 1</label><input type="text" id="cfg-c1" placeholder="e.g. Dineout"></div>
-      <div class="setting-row"><label>Custom 2</label><input type="text" id="cfg-c2" placeholder="e.g. Medical"></div>
-      <div class="setting-row"><label>Custom 3</label><input type="text" id="cfg-c3" placeholder="e.g. EMI"></div>
-    </div>
     <button class="save-btn" onclick="saveSettings()">Save Settings</button>
   </div>
 </div>
@@ -354,14 +347,14 @@ select.edit-inp{cursor:pointer}
 
 <script>
 // ── CONSTANTS ────────────────────────────────────────────
-const FIXED_CATS=["Grocery","Rice","Oil","Family","Recharge","Maid","School","Tuition","Renovation","Maintenance","Shopping","Tour","Medical","Household Items","EMI","Gas","Dining out","Service/Repair","Fuel","Fish/Meat","Saloon","Ticket","OTT","Leisure","EB","Masjid","Others"];
+const FIXED_CATS=["Grocery","Family","Shopping","Tour","Maid","Maintenance","Recharge","EB","Meat/Fish","Oil","Gas","Masjid","Medical","Fuel","Dining Out","Dineout","Household Items","Service/Repair","Saloon","Misc","Ticket","Rice","Tuition","Leisure","OTT","EMI","Others"];
 const MODES=["Cash","UPI","Card","Net Banking","Cheque"];
-const CAT_EMOJIS={"Grocery":"🛒","Rice":"🍚","Oil":"🫙","Family":"👨‍👩‍👧","Recharge":"📱","Maid":"🧹","School":"📚","Tuition":"✏️","Renovation":"🔨","Maintenance":"🔧","Shopping":"🛍","Tour":"✈️","Medical":"💊","Household Items":"🏠","EMI":"💳","Gas":"🔥","Dining out":"🍽️","Service/Repair":"🔧","Fuel":"⛽","Fish/Meat":"🐟","Saloon":"💈","Ticket":"🎟️","OTT":"📺","Leisure":"🎯","EB":"⚡","Masjid":"🕌","Others":"📦","Custom 1":"📌","Custom 2":"📌","Custom 3":"📌"};
+const CAT_EMOJIS={"Grocery":"🛒","Family":"👨‍👩‍👧","Shopping":"🛍","Tour":"✈️","Maid":"🧹","Maintenance":"🔧","Recharge":"📱","EB":"⚡","Meat/Fish":"🐟","Oil":"🫙","Gas":"🔥","Masjid":"🕌","Medical":"💊","Fuel":"⛽","Dining Out":"🍽","Dineout":"🍽","Household Items":"🏠","Service/Repair":"🔩","Saloon":"💈","Misc":"📦","Ticket":"🎟","Rice":"🌾","Tuition":"✏️","Leisure":"🎮","OTT":"📺","EMI":"💳","Others":"📌"};
 const CAT_COLORS=["#27c97a","#4a9eff","#f5a623","#e94560","#a78bfa","#34d399","#fb923c","#60a5fa","#f472b6","#2dd4bf","#94a3b8","#ff6b6b","#ffd93d","#6bcb77"];
 
 // ── STATE ────────────────────────────────────────────────
 let amtStr="",selectedCat="",selectedMode="UPI",selectedDate=todayStr(),isRecurring=false;
-let entries=[],cfg={url:"",c1:"Custom 1",c2:"Custom 2",c3:"Custom 3"};
+let entries=[],cfg={url:""};
 let activeHistMonth="",activeSumMonth="",editingId=null;
 
 // ── HELPERS ──────────────────────────────────────────────
@@ -379,9 +372,6 @@ function init(){
   try{const e=localStorage.getItem("exp_e");if(e)entries=JSON.parse(e);}catch(e){}
   try{const c=localStorage.getItem("exp_c");if(c)cfg={...cfg,...JSON.parse(c)};}catch(e){}
   document.getElementById("cfg-url").value=cfg.url||"";
-  document.getElementById("cfg-c1").value=cfg.c1==="Custom 1"?"":cfg.c1;
-  document.getElementById("cfg-c2").value=cfg.c2==="Custom 2"?"":cfg.c2;
-  document.getElementById("cfg-c3").value=cfg.c3==="Custom 3"?"":cfg.c3;
   buildNumpad();buildCats();buildModes();setDateDisplay();
   const d=new Date();
   document.getElementById("today-label").textContent=d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"});
@@ -412,7 +402,7 @@ function backspace(){amtStr=amtStr.slice(0,-1);updAmt();}
 function updAmt(){
   const el=document.getElementById("amt-display");
   el.textContent=amtStr||"0";el.classList.toggle("on",!!amtStr&&amtStr!=="0");
-  document.getElementById("hero-hint").textContent=selectedCat?(amtStr?"":catEmoji(selectedCat)+" "+selectedCat+" — tap ADD to save"):"tap a category & enter amount";
+  document.getElementById("hero-hint").textContent=selectedCat?(amtStr?"":"tap ADD to save"):"tap a category & enter amount";
 }
 
 // ── CATEGORIES ───────────────────────────────────────────
@@ -422,7 +412,7 @@ function buildCats(){
     const c=document.createElement("div");
     const recurring=entries.filter(e=>e.recurring&&e.cat===cat).length>0;
     c.className="cat-chip"+(selectedCat===cat?" active":"")+(recurring?" recurring-cat":"");
-    const emoji=recurring?"🔁":catEmoji(cat);const shortName=cat.length>6?cat.substring(0,5)+".":cat;c.innerHTML=`<span style="font-size:20px;line-height:1">${emoji}</span><span style="font-size:8px;color:var(--muted);line-height:1;max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortName}</span>`;c.title=cat;
+    c.textContent=(recurring?"🔁 ":"")+cat;
     c.addEventListener("click",()=>{
       selectedCat=cat;
       document.querySelectorAll(".cat-chip").forEach(x=>x.classList.remove("active"));
@@ -657,11 +647,8 @@ function openSettings(){document.getElementById("screen-settings").classList.add
 function closeSettings(){document.getElementById("screen-settings").classList.remove("open");}
 function saveSettings(){
   cfg.url=document.getElementById("cfg-url").value.trim();
-  cfg.c1=document.getElementById("cfg-c1").value.trim()||"Custom 1";
-  cfg.c2=document.getElementById("cfg-c2").value.trim()||"Custom 2";
-  cfg.c3=document.getElementById("cfg-c3").value.trim()||"Custom 3";
   try{localStorage.setItem("exp_c",JSON.stringify(cfg));}catch(e){}
-  buildCats();closeSettings();
+  closeSettings();
 }
 
 // ── NAV ──────────────────────────────────────────────────
